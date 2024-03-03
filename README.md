@@ -16,10 +16,15 @@ One-Command Deployment. We provide a fast and easy deployment strategy.
 
 ![Software Architecture](./docs/software-architecture.jpg)
 
+# Relational Database Schema
+
+![Diagram](./docs/database-diagram.png)
+
+
 # Setting up
 
 
-# Run with Docker Compose
+## Run with Docker Compose
 
 Verify that Docker Compose is installed correctly by checking the version
 (https://github.com/docker/compose/releases)
@@ -139,12 +144,12 @@ docker stack rm x-stack
 ## Run Frontend
 ```bash
 cd next-frontend
-yarn // for install 
-yarn run dev // for start service
+yarn # for install 
+yarn run dev # for start service
 ```
 ## Run Database
 
-- Download https://pocketbase.io/docs/ \
+- Download https://pocketbase.io/docs/
 - Move file pocketbase to microservice-cloud-app/pocketbase folder
 
 ```bash
@@ -164,13 +169,13 @@ docker run -d --name emqx -p 1883:1883 -p 18083:18083  emqx:5.5.0
 
 - On file (speechpublisherhandler/speech-handler.go) \
 -- Edit path on fuction SaveUploadFile. SaveUploadFile is used to store audio files. It is kept before the Python function reads the return text and removes the audio file. \
--- Change port. 
+-- Change port 
 ```go
 	c.SaveUploadedFile(file, "../../../speechpublisherhandler/temp/"+newFilename) //line 41
 ```
 
 - On file (speechpublisher/main.go) \
--- Change port. 
+-- Change port 
 ```go
     port := fmt.Sprintf(":%s", "8080") //line 47
 ```
@@ -188,7 +193,7 @@ docker run -d --name emqx -p 1883:1883 -p 18083:18083  emqx:5.5.0
 ```
 
 
-- Run publisher
+- Run Rublisher
 ```bash
 cd microservice-cloud-app/go-speech-publisher/cmd/speechpublisher
 go run main.go
@@ -205,5 +210,6 @@ go run main.go
 cd speech-to-text-service/main.py
 python3 main.py
 ```
-# Previos version
+
+# Reference Repository
 https://github.com/Jirawat-rackz/microservice-cloud-app?fbclid=IwAR1CdU1mA57dEwMw7BtNwqeOZDnlJ9EHN-QyswG8u_T39RVmDUQsk9h8_z4
