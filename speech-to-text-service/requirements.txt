@@ -1,0 +1,3 @@
+pydub==0.25.1
+speechrecognition
+paho.mqtt==1.5.1

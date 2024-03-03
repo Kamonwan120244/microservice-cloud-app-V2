@@ -1,0 +1,98 @@
+version: "3.9"
+
+services:
+  stt-py:
+    image: rackz/x-stack:speech-to-text-service-v1
+    restart: always
+    environment:
+      - MQTT_URL=localhost
+      - MQTT_PORT=1883
+      - MQTT_TOPIC_SUB=voice-publish
+      - MQTT_TOPIC_PUB=voice-consume
+      - OPENAI_API_KEY=
+    volumes:
+      - tempfile:/app/temp
+    networks:
+      - sst-network-backend
+    depends_on:
+      - emqx
+
+  emqx:
+    image: emqx:5
+    ports:
+      - 1883:1883
+      - 18083:18083
+    networks:
+      - sst-network-backend
+
+  pocketbase:
+    image: rackz/x-stack:pocketbase-v1
+    ports:
+      - 8090:8090
+    networks:
+      - sst-network-backend
+      - sst-network-frontend
+
+  speech-publisher:
+    image: rackz/x-stack:speech-publisher-v1
+    restart: always
+    environment:
+      - MQTT_HOST=localhost
+      - MQTT_PORT=1883
+      - USERNAME=
+      - PASSWORD=
+      # Gin server
+      - PORT=8080
+      # MQTT topics
+      - MQTT_PUBLISH_TOPIC=voice-publish
+    ports:
+      - 8080:8080
+    volumes:
+      - tempfile:/app/temp
+    networks:
+      - sst-network-backend
+    depends_on:
+      - emqx
+      - pocketbase
+
+  speech-comsumer:
+    image: rackz/x-stack:speech-consumer-v1
+    restart: always
+    networks:
+      - sst-network-backend
+    environment:
+      - MQTT_HOST=emqx
+      - MQTT_PORT=1883
+      - USERNAME=
+      - PASSWORD=
+
+      - MQTT_SUBSCRIBE_TOPIC=voice-consume
+
+      # Pocketbase Dashboard
+      - POCKETBASE_PUBLISH_PROTOCOL=http
+      - POCKETBASE_PUBLISH_HOST=pocketbase
+      - POCKETBASE_PUBLISH_PORT=8090
+      - POCKETBASE_PUBLISH_PATH=/api/collections/dashboard/records
+    depends_on:
+      - emqx
+      - pocketbase
+
+  frontend:
+    image: rackz/x-stack:next-frontend-v1
+    restart: always
+    environment:
+      # default env for frontend, if want to change it, please change it in .env file and build again
+      - NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1 # default api url for speech publisher
+      - NEXT_PUBLIC_API_DB=http://localhost:8090 # default api url for pocketbase
+    ports:
+      - 3000:3000
+    networks:
+      - sst-network-frontend
+
+networks:
+  sst-network-frontend:
+  sst-network-backend:
+
+volumes:
+  tempfile:
+    external: false

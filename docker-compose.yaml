@@ -1,0 +1,113 @@
+version: "3.5"
+
+services:
+  frontend:
+    build:
+      context: ./next-frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: always
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1
+      - NEXT_PUBLIC_API_DB=http://localhost:8090
+    ports:
+      - 3000:3000
+    networks:
+      - sst-network-frontend
+
+  emqx:
+    image: emqx:5
+    container_name: emqx
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - 1883:1883
+      - 18083:18083
+    networks:
+      - sst-network-frontend
+      - sst-network-backend
+    depends_on:
+      - frontend
+
+  pocketbase:
+    build:
+      context: ./pocketbase
+      dockerfile: Dockerfile
+      args:
+        - VERSION=0.20.7
+    container_name: pocketbase
+    restart: always
+    ports:
+      - 8090:8090
+    volumes:
+      - ./pocketbase/pb_data:/pb_data
+    env_file:
+      - .env
+    networks:
+      - sst-network-backend
+      - sst-network-frontend
+    depends_on:
+      - frontend
+
+  stt-py:
+    build:
+      context: ./speech-to-text-service
+      dockerfile: Dockerfile
+    container_name: stt-py
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - tempfile:/app/temp
+    networks:
+      - sst-network-backend
+    depends_on:
+      - emqx
+
+  speech-publisher:
+    build:
+      context: ./go-speech-publisher
+      dockerfile: Dockerfile
+      args:
+        - APP_NAME=speechpublisher
+        - APP_PORT=8080
+    container_name: speech-publisher
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - tempfile:/app/temp
+    ports:
+      - 8080:8080
+    networks:
+      - sst-network-backend
+    depends_on:
+      - emqx
+      - pocketbase
+      - frontend
+
+  speech-consumer:
+    build:
+      context: ./go-speech-publisher
+      dockerfile: Dockerfile
+      args:
+        - APP_NAME=speechconsumer
+        - APP_PORT=8080
+    container_name: speech-consumer
+    restart: always
+    env_file:
+      - .env
+    networks:
+      - sst-network-backend
+    depends_on:
+      - emqx
+      - pocketbase
+      - frontend
+
+networks:
+  sst-network-frontend:
+  sst-network-backend:
+
+volumes:
+  tempfile:
