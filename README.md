@@ -140,7 +140,7 @@ docker stack rm x-stack
 ```bash
 cd next-frontend
 yarn // for install 
-yarn dev // for start service
+yarn run dev // for start service
 ```
 ## Run Database
 
@@ -172,7 +172,7 @@ docker run -d --name emqx -p 1883:1883 -p 18083:18083  emqx:5.5.0
 - On file (speechpublisher/main.go) \
 -- Change port. 
 ```go
-    port := fmt.Sprintf(":%s", os.Getenv("8080")) //line 47
+    port := fmt.Sprintf(":%s", "8080") //line 47
 ```
 
 - On file (speechconsumer/main.go) \
@@ -190,7 +190,7 @@ docker run -d --name emqx -p 1883:1883 -p 18083:18083  emqx:5.5.0
 
 - Run publisher
 ```bash
-cd microservice-cloud-app/go-speech-publisher/cmd/speechconsumer
+cd microservice-cloud-app/go-speech-publisher/cmd/speechpublisher
 go run main.go
 ```
 
@@ -200,5 +200,10 @@ cd microservice-cloud-app/go-speech-publisher/cmd/speechconsumer
 go run main.go
 ```
 
+- Run Python
+```bash
+cd speech-to-text-service/main.py
+python3 main.py
+```
 # Previos version
 https://github.com/Jirawat-rackz/microservice-cloud-app?fbclid=IwAR1CdU1mA57dEwMw7BtNwqeOZDnlJ9EHN-QyswG8u_T39RVmDUQsk9h8_z4
