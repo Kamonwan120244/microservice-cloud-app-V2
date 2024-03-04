@@ -5,7 +5,7 @@ import {
   Frame,
 } from '@/styles/voice-processing.style';
 import LayoutProvider from '@/providers/layout.provider';
-import { Button, Form, Steps, message, notification } from 'antd';
+import { Button, Form, Steps, notification } from 'antd';
 import FormPatient from '@/components/form-patient';
 import { pb } from '../_app';
 import EyeTest from '@/components/eye-test';

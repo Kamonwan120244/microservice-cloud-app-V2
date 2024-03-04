@@ -19,8 +19,10 @@ interface AudioRecorderProps {
   setTimer: Dispatch<SetStateAction<number>>;
   setElapsedTime: Dispatch<SetStateAction<number>>;
   setIsModalOpen: Dispatch<SetStateAction<boolean>>;
+  setIsLoading: Dispatch<SetStateAction<boolean>>;
   setOrderDisplay: Dispatch<SetStateAction<number>>;
   setRandomWord: Dispatch<SetStateAction<string[]>>;
+  setWord: Dispatch<SetStateAction<string[] | undefined>>;
   randomWord?: string[];
   characters: string;
 }
@@ -41,6 +43,8 @@ const AudioRecorder: React.ForwardRefRenderFunction<
     setOrderDisplay,
     setRandomWord,
     characters,
+    setWord,
+    setIsLoading,
   },
   ref
 ) => {
@@ -79,9 +83,11 @@ const AudioRecorder: React.ForwardRefRenderFunction<
     setRandomWord([
       characters.charAt(Math.floor(Math.random() * characters.length)),
     ]);
+    setWord([]);
     setOrderDisplay(0);
     setElapsedTime(0);
     setIsStart(true);
+    setIsLoading(false);
     setRecordingStatus('recording');
     //create new Media recorder instance using the stream
     const media = new MediaRecorder(
