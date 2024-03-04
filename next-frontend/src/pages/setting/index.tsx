@@ -103,7 +103,7 @@ function SettingPage() {
           id="formSetFont"
         >
           <p style={{ textAlign: 'center' }}>Snellen Chart</p>
-          <p style={{ textAlign: 'center' }}>Size Test (cm)</p>
+          <p style={{ textAlign: 'center' }}>Size Test (mm)</p>
           {inputFont.map((data) => {
             return (
               <>
