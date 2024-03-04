@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, notification } from 'antd';
+import { notification } from 'antd';
 import { CountdownCircleTimer } from 'react-countdown-circle-timer';
 import AudioRecorder, { AudioRecorderRef } from '../audio-recorder';
 import { pb } from '@/pages/_app';
@@ -11,8 +11,8 @@ const EyeTest = () => {
   const [listFontSize, setListFontSize] = React.useState<Record>();
   const [api, contextHolder] = notification.useNotification();
 
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  const patternDisplay = '12345678';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const patternDisplay = '1223334444';
   // const patternDisplay = '112222333333444444555555666666777777888888';
   const timerDuration = 3;
   const clinic_id = pb.authStore.model?.clinic_id;
@@ -20,15 +20,25 @@ const EyeTest = () => {
   const [isStart, setIsStart] = React.useState(false);
   const [timer, setTimer] = React.useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
-  // console.log('🚀 ~ EyeTest ~ elapsedTime:', elapsedTime);
   const [orderDisplay, setOrderDisplay] = useState(0);
-  const [word, setWord] = useState<Record[]>([]);
+  const [word, setWord] = useState<string[] | undefined>();
   const [randomWord, setRandomWord] = useState<string[]>([
     characters.charAt(Math.floor(Math.random() * characters.length)),
   ]);
-  console.log('🚀 ~ EyeTest ~ randomWord:', randomWord);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const wordChecked =
+    word !== undefined
+      ? randomWord.map((value, intex) => {
+          return {
+            text: value,
+            isCorrect:
+              value.toLocaleLowerCase() === word[intex]?.toLocaleLowerCase(),
+          };
+        })
+      : [];
 
   const getRandomWord = React.useCallback(() => {
     setRandomWord((prevRandomWord) => [
@@ -59,12 +69,14 @@ const EyeTest = () => {
         filter: `user_id='${pb.authStore.model?.id}'`,
         sort: '-created',
       });
-      setWord(result.items);
+      setWord(result.items[0]?.word.split(' '));
     } catch (error: any) {
       api.error({
         message: 'Error',
         description: error?.message,
       });
+    } finally {
+      setIsLoading(true);
     }
   }, [api]);
 
@@ -187,9 +199,18 @@ const EyeTest = () => {
           setOrderDisplay={setOrderDisplay}
           setRandomWord={setRandomWord}
           characters={characters}
+          setWord={setWord}
+          setIsLoading={setIsLoading}
         />
       </div>
-      {/* <ModalScore isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} /> */}
+      <ModalScore
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        wordChecked={wordChecked}
+        isLoading={isLoading}
+        patternDisplay={patternDisplay}
+        randomWord={randomWord}
+      />
     </>
   );
 };
